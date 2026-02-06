@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Valentine Proposal</title>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background: linear-gradient(135deg,#ff9ec4,#ffd6ec,#ffe8a3);
+  background-size:400% 400%;
+  animation:gradientBG 12s ease infinite;
+}
+
+@keyframes gradientBG{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+
+.center{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+}
+
+button{
+  padding:12px 24px;
+  font-size:18px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  margin:10px;
+  transition:.2s;
+}
+
+.yes{
+  background:#ff4d88;
+  color:white;
+}
+.yes:hover{ transform:scale(1.1); }
+
+.no{
+  background:gray;
+  color:white;
+  position:relative;
+}
+
+.badge{
+  position:fixed;
+  bottom:15px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#ff4d88;
+  color:white;
+  padding:10px 20px;
+  border-radius:20px;
+  font-weight:bold;
+}
+
+.cards{
+  display:none;
+  padding:30px;
+  text-align:center;
+}
+
+.card{
+  display:inline-block;
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  margin:10px;
+  width:160px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+.disabled{
+  background:#eee;
+  opacity:.5;
+}
+
+img.reaction{
+  width:220px;
+  border-radius:16px;
+  margin-bottom:15px;
+}
+
+.gallery img{
+  width:120px;
+  height:120px;
+  object-fit:cover;
+  border-radius:12px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Proposal Page -->
+<div class="center" id="proposal">
+<h1>Meri Cookko my love, Will you be my Valentine? 💖</h1>
+
+<img id="reactionImg" class="reaction" style="display:none;">
+
+<div id="buttons">
+<button class="yes" onclick="accept()">Yes ❤️</button>
+<button class="no" id="noBtn">No 🙈</button>
+</div>
+</div>
+
+<!-- Cards Page -->
+<div class="cards" id="cardsPage">
+<button onclick="goBack()">⬅ Back to Valentine</button>
+<h2>Valentine Week 💘</h2>
+<div id="cardContainer"></div>
+<!-- 
+<h3>Memories 📸</h3>
+<input type="file" multiple accept="image/*" id="upload">
+<div class="gallery" id="gallery"></div>
+</div>
+
+<div class="badge" id="countdown"></div> -->
+
+<audio id="music" loop>
+<source src="https://www.bensound.com/bensound-music/bensound-romantic.mp3">
+</audio>
+
+<script>
+const reactionImages=[
+"./2.jpeg","./3.jpeg","./5.jpeg","./6.jpeg"
+];
+
+let hoverCount=0;
+const noBtn=document.getElementById("noBtn");
+const reactionImg=document.getElementById("reactionImg");
+const buttons=document.getElementById("buttons");
+
+noBtn.addEventListener("mouseover",()=>{
+hoverCount++;
+
+if(hoverCount===3){
+showReaction();
+hoverCount=0;
+return;
+}
+
+noBtn.style.position="absolute";
+noBtn.style.top=Math.random()*80+"%";
+noBtn.style.left=Math.random()*80+"%";
+});
+
+function showReaction(){
+buttons.style.display="none";
+reactionImg.style.display="block";
+
+let i=0;
+reactionImg.src=reactionImages[i];
+
+const interval=setInterval(()=>{
+i=Math.floor(Math.random()*reactionImages.length);
+reactionImg.src=reactionImages[i];
+},3000);
+
+setTimeout(()=>{
+clearInterval(interval);
+reactionImg.style.display="none";
+buttons.style.display="block";
+},9000);
+}
+
+function accept(){
+confetti({particleCount:150,spread:90});
+document.getElementById("proposal").style.display="none";
+document.getElementById("cardsPage").style.display="block";
+document.getElementById("music").play();
+}
+
+function goBack(){
+document.getElementById("proposal").style.display="flex";
+document.getElementById("cardsPage").style.display="none";
+}
+
+const week=[
+["Rose Day","02-07","A rose for you 🌹"],
+["Propose Day","02-08","I choose you 💍"],
+["Chocolate Day","02-09","Life is sweeter with you 🍫"],
+["Teddy Day","02-10","A warm teddy hug 🧸"],
+["Promise Day","02-11","I promise to stay 🤝"],
+["Hug Day","02-12","Big hug 🤗"],
+["Kiss Day","02-13","A little kiss 😘"],
+["Valentine","02-14","Happy Valentine's ❤️"]
+];
+
+const container=document.getElementById("cardContainer");
+const today=new Date();
+const key=(today.getMonth()+1).toString().padStart(2,"0")+"-"+today.getDate().toString().padStart(2,"0");
+
+week.forEach(d=>{
+const div=document.createElement("div");
+div.className="card";
+
+if(d[1]>key) div.classList.add("disabled");
+
+div.innerHTML=`<b>${d[0]}</b><br>${d[1]}<br><small>${d[1]<=key?d[2]:"Locked"}</small>`;
+container.appendChild(div);
+});
+
+document.getElementById("upload").addEventListener("change",(e)=>{
+const gallery=document.getElementById("gallery");
+[...e.target.files].forEach(file=>{
+const img=document.createElement("img");
+img.src=URL.createObjectURL(file);
+gallery.appendChild(img);
+});
+});
+
+function updateCountdown(){
+const now=new Date();
+const target=new Date(now.getFullYear(),1,14);
+const diff=target-now;
+const days=Math.floor(diff/(1000*60*60*24));
+document.getElementById("countdown").innerText=
+days>0?days+" days until Feb 14 ❤️":"Happy Valentine's Day ❤️";
+}
+setInterval(updateCountdown,1000);
+updateCountdown();
+</script>
+
+</body>
+</html>
