@@ -15,6 +15,19 @@ body{
   animation:gradientBG 12s ease infinite;
 }
 
+/* floating hearts */
+.heart{
+  position:absolute;
+  bottom:-20px;
+  color:#ff4d88;
+  animation:floatUp linear infinite;
+}
+@keyframes floatUp{
+  from{transform:translateY(0);opacity:.8}
+  to{transform:translateY(-110vh);opacity:0}
+}
+
+
 @keyframes gradientBG{
   0%{background-position:0% 50%;}
   50%{background-position:100% 50%;}
@@ -62,6 +75,7 @@ button{
   padding:10px 20px;
   border-radius:20px;
   font-weight:bold;
+  font-size: 10px;
 }
 
 .cards{
@@ -97,14 +111,33 @@ img.reaction{
   object-fit:cover;
   border-radius:12px;
 }
+/* modal */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  justify-content:center;
+  align-items:center;
+}
+.modal-box{
+  background:white;
+  padding:20px;
+  border-radius:16px;
+  text-align:center;
+  width:320px;
+}
 </style>
 </head>
 
 <body>
 
+<div id="hearts"></div>
+
 <!-- Proposal Page -->
 <div class="center" id="proposal">
-<h1>Meri Cookko my love, Will you be my Valentine? 💖</h1>
+<img id="Img" class="reaction" src="./1.jpeg" alt="Love Gif" width="300">
+<h1>Meri Cookko 💖 my love, Will you be my Valentine? 💖</h1>
 
 <img id="reactionImg" class="reaction" style="display:none;">
 
@@ -114,11 +147,30 @@ img.reaction{
 </div>
 </div>
 
+
 <!-- Cards Page -->
 <div class="cards" id="cardsPage">
-<button onclick="goBack()">⬅ Back to Valentine</button>
-<h2>Valentine Week 💘</h2>
-<div id="cardContainer"></div>
+  
+  
+  <img id="Img" class="reaction" src="./4.jpeg" alt="Love Gif" width="300">
+  <h1>Thank Youu for always being with me 💖💖</h1>
+  
+  <h2>Valentine Week 💘</h2>
+  <div id="cardContainer"></div>
+  <button class="yes" onclick="goBack()">⬅ Back to Valentine Page</button>
+
+  <div class="badge" id="countdown"></div>
+
+
+<!-- Modal -->
+<div id="dayModal" class="modal">
+  <div class="modal-box">
+  <img id="modalImg" style="width:100%;border-radius:12px;">
+  <h2 id="modalTitle"></h2>
+  <p id="modalText"></p>
+  <button onclick="closeModal()">Close</button>
+  </div>
+  </div>
 <!-- 
 <h3>Memories 📸</h3>
 <input type="file" multiple accept="image/*" id="upload">
@@ -132,6 +184,19 @@ img.reaction{
 </audio>
 
 <script>
+  const heartContainer=document.getElementById("hearts");
+setInterval(()=>{
+  const h=document.createElement("div");
+  h.className="heart";
+  h.innerText="❤";
+  h.style.left=Math.random()*100+"vw";
+  h.style.fontSize=(20+Math.random()*30)+"px";
+  h.style.animationDuration=(5+Math.random()*5)+"s";
+  document.body.appendChild(h);
+  setTimeout(()=>h.remove(),9000);
+},500);
+
+
 const reactionImages=[
 "./2.jpeg","./3.jpeg","./5.jpeg","./6.jpeg"
 ];
@@ -186,15 +251,46 @@ document.getElementById("proposal").style.display="flex";
 document.getElementById("cardsPage").style.display="none";
 }
 
+
+function updateCountdown() {
+  const now = new Date();
+  let target = new Date(now.getFullYear(), 1, 14, 0, 0, 0); // Feb 14 at 00:00
+
+  // If Feb 14 already passed this year, use next year
+  if (now > target) {
+    target = new Date(now.getFullYear() + 1, 1, 14, 0, 0, 0);
+  }
+
+  const diff = target - now; // difference in ms
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+
+  document.getElementById("countdown").innerText =
+    days + "d " + hours + "h " + minutes + "m " + seconds + "s until Feb 14 ❤️";
+
+  if (diff <= 0) {
+    document.getElementById("countdown").innerText = "Happy Valentine's Day ❤️";
+  }
+}
+
+// Update every second
+updateCountdown();
+setInterval(updateCountdown, 1000);
+
+
+/* Valentine week cards */
 const week=[
-["Rose Day","02-07","A rose for you 🌹"],
-["Propose Day","02-08","I choose you 💍"],
-["Chocolate Day","02-09","Life is sweeter with you 🍫"],
-["Teddy Day","02-10","A warm teddy hug 🧸"],
-["Promise Day","02-11","I promise to stay 🤝"],
-["Hug Day","02-12","Big hug 🤗"],
-["Kiss Day","02-13","A little kiss 😘"],
-["Valentine","02-14","Happy Valentine's ❤️"]
+["Rose Day","02-07","Bouquet of roses for my beautiful girl 🌹. Happy rose day my love","./88.jpeg"],
+["Propose Day","02-08","I choose you forever 💍","propose.jpeg"],
+["Chocolate Day","02-09","Life is sweeter with you 🍫","chocolate.jpeg"],
+["Teddy Day","02-10","A warm teddy hug 🧸","teddy.jpeg"],
+["Promise Day","02-11","I promise to stay 🤝","promise.jpeg"],
+["Hug Day","02-12","Big hug 🤗","hug.jpeg"],
+["Kiss Day","02-13","A little kiss 😘","kiss.jpeg"],
+["Valentine","02-14","Happy Valentine's ❤️","valentine.jpeg"]
 ];
 
 const container=document.getElementById("cardContainer");
@@ -207,29 +303,26 @@ div.className="card";
 
 if(d[1]>key) div.classList.add("disabled");
 
-div.innerHTML=`<b>${d[0]}</b><br>${d[1]}<br><small>${d[1]<=key?d[2]:"Locked"}</small>`;
+div.innerHTML=`<b>${d[0]}</b><br>${d[1]}`;
+
+if(d[1]<=key){
+div.onclick=()=>openDay(d);
+}
+
 container.appendChild(div);
 });
 
-document.getElementById("upload").addEventListener("change",(e)=>{
-const gallery=document.getElementById("gallery");
-[...e.target.files].forEach(file=>{
-const img=document.createElement("img");
-img.src=URL.createObjectURL(file);
-gallery.appendChild(img);
-});
-});
-
-function updateCountdown(){
-const now=new Date();
-const target=new Date(now.getFullYear(),1,14);
-const diff=target-now;
-const days=Math.floor(diff/(1000*60*60*24));
-document.getElementById("countdown").innerText=
-days>0?days+" days until Feb 14 ❤️":"Happy Valentine's Day ❤️";
+/* modal functions */
+function openDay(day){
+dayModal.style.display="flex";
+modalTitle.innerText=day[0];
+modalText.innerText=day[2];
+modalImg.src=day[3];
 }
-setInterval(updateCountdown,1000);
-updateCountdown();
+
+function closeModal(){
+dayModal.style.display="none";
+}
 </script>
 
 </body>
